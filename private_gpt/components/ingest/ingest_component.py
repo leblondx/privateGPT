@@ -264,15 +264,11 @@ class ParallelizedIngestComponent(BaseIngestComponentWithIndex):
         return self._save_docs(documents)
 
     def bulk_ingest(self, files: list[tuple[str, Path]]) -> list[Document]:
-        # Lightweight threads, used for parallelize the
-        # underlying IO calls made in the ingestion
-
-        documents = list(
+        return list(
             itertools.chain.from_iterable(
                 self._ingest_work_pool.starmap(self.ingest, files)
             )
         )
-        return documents
 
     def _save_docs(self, documents: list[Document]) -> list[Document]:
         logger.debug("Transforming count=%s documents into nodes", len(documents))

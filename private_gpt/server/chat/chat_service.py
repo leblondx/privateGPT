@@ -42,12 +42,12 @@ class ChatEngineInput:
         # Detect if there is a system message, extract the last message and chat history
         system_message = (
             messages[0]
-            if len(messages) > 0 and messages[0].role == MessageRole.SYSTEM
+            if messages and messages[0].role == MessageRole.SYSTEM
             else None
         )
         last_message = (
             messages[-1]
-            if len(messages) > 0 and messages[-1].role == MessageRole.USER
+            if messages and messages[-1].role == MessageRole.USER
             else None
         )
         # Remove from messages list the system message and last message,
@@ -56,7 +56,7 @@ class ChatEngineInput:
             messages.pop(0)
         if last_message:
             messages.pop(-1)
-        chat_history = messages if len(messages) > 0 else None
+        chat_history = messages if messages else None
 
         return cls(
             system_message=system_message,
@@ -147,10 +147,9 @@ class ChatService:
             chat_history=chat_history,
         )
         sources = [Chunk.from_node(node) for node in streaming_response.source_nodes]
-        completion_gen = CompletionGen(
+        return CompletionGen(
             response=streaming_response.response_gen, sources=sources
         )
-        return completion_gen
 
     def chat(
         self,
@@ -183,5 +182,4 @@ class ChatService:
             chat_history=chat_history,
         )
         sources = [Chunk.from_node(node) for node in wrapped_response.source_nodes]
-        completion = Completion(response=wrapped_response.response, sources=sources)
-        return completion
+        return Completion(response=wrapped_response.response, sources=sources)
